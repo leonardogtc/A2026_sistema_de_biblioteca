@@ -99,3 +99,70 @@ O Prisma foi configurado com sucesso e integrado ao PostgreSQL do projeto!
 
 	  • Para abrir exatamente esta conversa pelo ID:
             agy --conversation 313b240f-96ee-47b5-a5e2-71dc4c014dd9
+
+Todos os requisitos foram implementados e testados com sucesso!
+  ──────
+  ### 1. Resumo das Implementações
+
+   Requisito                              | S… | Implementação
+  ----------------------------------------|----|-------------------------------------------
+   1. Tela de Login com Bootstrap         |    | Criada em login.html com design
+                                          |    | responsivo Bootstrap 5, formulário com
+                                          |    | validação e atalho de preenchimento.
+   1. Usuário de teste no PostgreSQL      |    | Criado via seed.js com senha
+                                          |    | criptografada (bcrypt) e foto gravada no
+                                          |    | banco.
+   1.1. Alerta / Popup em caso de falha   |    | Emite Modal Popup de erro do Bootstrap
+                                          |    | (#modalErroLogin) + Alert inline dinâmico
+                                          |    | com foco de volta no formulário sem sair
+                                          |    | da tela.
+   1.2. Dashboard Principal               |    | Criado em dashboard.html com KPIs, blocos
+                                          |    | de Cadastros, Consultas e Relatórios.
+   1.2.1. Menu Lateral Offcanvas Oculto   |    | Barra superior com botão hambúrguer à
+                                          |    | esquerda que aciona o painel lateral
+                                          |    | deslizante do Bootstrap (permanece oculto
+                                          |    | por padrão).
+   1.2.2. Identificação com Foto Circular |    | Lado direito da barra exibe o nome do
+                                          |    | usuário e a foto do rosto em moldura
+                                          |    | circular (.user-avatar-frame rounded-
+                                          |    | circle) com dropdown de perfil.
+   1.2.3. Armazenamento Binário no Banco  |    | Adicionados campos foto Bytes? (coluna
+                                          |    | BYTEA no PostgreSQL) e foto_mime_type no
+                                          |    | schema.prisma. O binário é servido via
+                                          |    | rota /api/usuarios/:id/foto.
+  ──────
+  ### 2. Credenciais do Usuário de Teste
+
+  • E-mail: admin@biblioteca.com
+  • Senha: admin123
+  • Nome: Maria Silva
+  • Foto: Imagem de rosto de 3,2 KB gravada diretamente no PostgreSQL como binário (BYTEA).
+  ──────
+  ### 3. Como Acessar e Testar
+
+  O servidor Express já está rodando em segundo plano:
+
+  1. Acesse no seu navegador:
+      • http://localhost:3000/login
+  2. Teste a falha (Requisito 1.1):
+      • Digite uma senha incorreta ou e-mail inexistente e clique em Acessar Sistema.
+      • O sistema abrirá um Modal Popup e um Alert informando o erro, mantendo você na tela
+      de login.
+  3. Teste o sucesso (Requisitos 1.2, 1.2.1, 1.2.2 e 1.2.3):
+      • Clique no botão Preencher (ou digite admin@biblioteca.com e admin123).
+      • Ao entrar no Dashboard:
+	  • Canto superior esquerdo: Clique no botão de menu para abrir o painel lateral
+	  com opções de Cadastros, Consultas e Relatórios.
+	  • Canto superior direito: Veja a foto do rosto de Maria Silva na moldura circular
+	  servida diretamente do banco de dados, com menu dropdown para ver o perfil
+	  completo ou encerrar a sessão.
+
+
+  ──────
+  ### 4. Scripts Adicionados no package.json
+
+  • Iniciar o servidor:
+    npm start
+
+  • Recarregar dados de teste (Seed):
+    npm run seed
