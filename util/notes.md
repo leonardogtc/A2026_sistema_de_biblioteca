@@ -79,3 +79,23 @@ O Prisma foi configurado com sucesso e integrado ao PostgreSQL do projeto!
       });
       res.status(201).json(novoLivro);
     });
+
+
+### Como funciona e onde fica salvo:
+
+  1. Persistência local:
+      • Todos os comandos, respostas e arquivos gerados nesta sessão estão salvos na pasta:
+      ~/.gemini/antigravity-cli/brain/313b240f-96ee-47b5-a5e2-71dc4c014dd9/
+      • O transcript completo da conversa fica registrado em arquivos de log internos
+      (transcript.jsonl).
+  2. Como retomar esta conversa mais tarde:
+      • Se estiver usando a interface gráfica / IDE: as conversas anteriores ficam
+      acessíveis no painel lateral de histórico de conversas/chats.
+      • Pelo terminal (agy CLI):
+	  • Para continuar a conversa mais recente:
+            agy -c
+            # ou
+            agy --continue
+
+	  • Para abrir exatamente esta conversa pelo ID:
+            agy --conversation 313b240f-96ee-47b5-a5e2-71dc4c014dd9

@@ -1,46 +1,108 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
 }
 
-model Livro {
-  id            Int          @id @default(autoincrement())
-  titulo        String
-  autor         String
-  isbn          String?      @unique
-  anoPublicacao Int?
-  disponivel    Boolean      @default(true)
-  criadoEm      DateTime     @default(now())
-  atualizadoEm  DateTime     @updatedAt
-  emprestimos   Emprestimo[]
+generator client {
+  provider = "prisma-client-js"
+}
 
+enum StatusUsuario {
+  ATIVO
+  SUSPENSO
+  INATIVO
+}
+
+enum StatusEmprestimo {
+  EM_ANDAMENTO
+  CONCLUIDO
+  ATRASADO
+  EXTRAVIADO
+}
+
+model Categoria {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique @db.VarChar(100)
+  descricao String?  @db.Text
+  criadoEm  DateTime @default(now()) @map("criado_em") @db.Timestamptz()
+  livros    Livro[]
+
+  @@map("categorias")
+}
+
+model Autor {
+  id             Int          @id @default(autoincrement())
+  nome           String       @db.VarChar(150)
+  nacionalidade  String?      @db.VarChar(80)
+  dataNascimento DateTime?    @map("data_nascimento") @db.Date
+  criadoEm       DateTime     @default(now()) @map("criado_em") @db.Timestamptz()
+  livros         LivroAutor[]
+
+  @@map("autores")
+}
+
+model Livro {
+  id                   Int          @id @default(autoincrement())
+  titulo               String       @db.VarChar(255)
+  subtitulo            String?      @db.VarChar(255)
+  isbn                 String       @unique @db.VarChar(20)
+  anoPublicacao        Int?         @map("ano_publicacao") @db.SmallInt
+  edicao               Int          @default(1) @db.SmallInt
+  editora              String?      @db.VarChar(120)
+  categoriaId          Int          @map("categoria_id")
+  quantidadeTotal      Int          @default(1) @map("quantidade_total")
+  quantidadeDisponivel Int          @default(1) @map("quantidade_disponivel")
+  criadoEm             DateTime     @default(now()) @map("criado_em") @db.Timestamptz()
+  atualizadoEm         DateTime     @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz()
+
+  categoria            Categoria    @relation(fields: [categoriaId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  autores              LivroAutor[]
+  emprestimos          Emprestimo[]
+
+  @@index([titulo], map: "idx_livros_titulo")
+  @@index([categoriaId], map: "idx_livros_categoria")
   @@map("livros")
 }
 
+model LivroAutor {
+  livroId Int   @map("livro_id")
+  autorId Int   @map("autor_id")
+
+  livro   Livro @relation(fields: [livroId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  autor   Autor @relation(fields: [autorId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+  @@id([livroId, autorId])
+  @@map("livros_autores")
+}
+
 model Usuario {
-  id          Int          @id @default(autoincrement())
-  nome        String
-  email       String       @unique
-  telefone    String?
-  criadoEm    DateTime     @default(now())
+  id          Int           @id @default(autoincrement())
+  nome        String        @db.VarChar(150)
+  email       String        @unique @db.VarChar(180)
+  telefone    String?       @db.VarChar(20)
+  cpf         String        @unique @db.VarChar(14)
+  status      StatusUsuario @default(ATIVO)
+  criadoEm    DateTime      @default(now()) @map("criado_em") @db.Timestamptz()
   emprestimos Emprestimo[]
 
   @@map("usuarios")
 }
 
 model Emprestimo {
-  id             Int       @id @default(autoincrement())
-  usuarioId      Int
-  livroId        Int
-  dataEmprestimo DateTime  @default(now())
-  dataDevolucao  DateTime?
-  devolvido      Boolean   @default(false)
+  id                    Int              @id @default(autoincrement())
+  livroId               Int              @map("livro_id")
+  usuarioId             Int              @map("usuario_id")
+  dataEmprestimo        DateTime         @default(now()) @map("data_emprestimo") @db.Date
+  dataPrevistaDevolucao DateTime         @map("data_prevista_devolucao") @db.Date
+  dataDevolucaoReal     DateTime?        @map("data_devolucao_real") @db.Date
+  status                StatusEmprestimo @default(EM_ANDAMENTO)
+  observacoes           String?          @db.Text
+  criadoEm              DateTime         @default(now()) @map("criado_em") @db.Timestamptz()
 
-  usuario        Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  livro          Livro     @relation(fields: [livroId], references: [id], onDelete: Cascade)
+  livro                 Livro            @relation(fields: [livroId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  usuario               Usuario          @relation(fields: [usuarioId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
+  @@index([status], map: "idx_emprestimos_status")
+  @@index([usuarioId], map: "idx_emprestimos_usuario")
+  @@index([livroId], map: "idx_emprestimos_livro")
   @@map("emprestimos")
 }
